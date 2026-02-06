@@ -16,9 +16,23 @@ jobs:
         exclude:
           - os: windows-latest
             c_compiler: gcc
+    defaults:
+      run:
+        shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
     steps:
+    - name: Setup MSYS2/CLANG64 environment
+      if: matrix.os == 'windows-latest'
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        msystem: clang64
+        pacboy: >-
+          toolchain:p
+          cmake:p
+          ninja:p
     - uses: actions/checkout@v4
     - name: Setup CMake
+      if: matrix.os != 'windows-latest'
       uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: '4.2.x'
@@ -26,15 +40,8 @@ jobs:
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
-      shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-      
-    - name: Setup CLANG compiler
-      if: matrix.c_compiler == 'clang'
-      uses: KyleMayes/install-llvm-action@v2
-      with:
-        version: "21.1"
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -56,14 +63,14 @@ jobs:
     #  # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
     #  # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
     #  run: ctest --build-config ${{ matrix.build_type }}
+
     - name: Setup artifact path
       run: cmake --install ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
     - name: Upload atrifacts
-      uses: actions/upload-artifact@v6.0.0
+      uses: actions/upload-artifact@v6
       with:
         # Artifact name
         name: "${{ matrix.os }}_${{matrix.c_compiler}}_${{ matrix.build_type }}"
         # A file, directory or wildcard pattern that describes what to upload
         path: "${{ steps.strings.outputs.build-output-dir }}/tarball"
-      
