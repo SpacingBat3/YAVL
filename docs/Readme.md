@@ -49,8 +49,8 @@ slower copy-alike data return.
 > [!NOTE]
 > There's still no guarantees for every use case to be memory-safe: currently
 > library is implemented in way you need to allocate memory properly by yourself,
-> this means you need to assign `VEC_T_ALLOCATOR` macro's value (or, currently,
-> zero-fill the data)
+> this means you need to initially assign it to `VEC_T_ALLOCATOR` macro's value
+> (or, currently, zero-fill the memory space).
 
 ### 6. Implicit memory immutability in types and arguments
 
