@@ -34,7 +34,7 @@ jobs:
       if: matrix.c_compiler == 'clang'
       uses: KyleMayes/install-llvm-action@v2
       with:
-        version: "21.0"
+        version: "21.1"
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
