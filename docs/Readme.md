@@ -107,7 +107,7 @@ formats (be it CSV or obscure academic input data file).
 
 ## License
 
-See [COPYING](COPYING) for license for public release of this project.
+See [COPYING](../COPYING) for licensing information about this project.
 
 Take note that another releases of this project, including academic ones,
 might be a subject to exclusive licensing terms and conditions, as this
