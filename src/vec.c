@@ -18,7 +18,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <stdbool.h>
 #include <string.h>
 
 #include "namespace.h"
@@ -86,7 +85,7 @@ NS(vec_res_t) NS(vec_set)(NS(vec_t)* const vec, size_t offset, const void *const
   if(vec == NULL) return NS_UPPER(VEC_RES_NULL);
   if(offset >= vec->size) return NS_UPPER(VEC_RES_FAIL);
   // Copy memory
-  return !!memcpy(
+  return (NS(vec_res_t) /* VEC_RES_FAIL == 1 */) !memcpy(
     vec->data+(offset*vec->allignment),
     data,
     vec->allignment
@@ -94,10 +93,12 @@ NS(vec_res_t) NS(vec_set)(NS(vec_t)* const vec, size_t offset, const void *const
 }
 
 NS(vec_res_t) NS(vec_get)(NS(vec_t)* const vec, size_t offset, void *const out) {
-  // Simple bound checks
-  if(vec != NULL && offset >= vec->size) return false;
+  // Simple bound checks // FIXME: opt oportunities
+  if(vec == NULL) return NS_UPPER(VEC_RES_NULL);
+  if(offset >= vec->size) return NS_UPPER(VEC_RES_FAIL);
+
   // Copy memory
-  return !!memcpy(
+  return (NS(vec_res_t) /* VEC_RES_FAIL == 1 */) !memcpy(
     out,
     vec->data+(offset*vec->allignment),
     vec->allignment
@@ -113,7 +114,7 @@ NS(vec_errorable_t) NS(vec_ref)(NS(vec_t)* const vec) {
   };
 }
 
-NS(vec_res_t) NS(vec_chkptr)(const NS(vec_t)* const vec, const void *const ptr) {
+bool NS(vec_chkptr)(const NS(vec_t)* const vec, const void *const ptr) {
   return
     // Test boundaries
     ptr > vec->data && ptr < vec->data+(vec->allignment*vec->reservd) &&
