@@ -62,7 +62,7 @@ will be modified or not.
 As I use `clangd` for my C language server for various IDEs and code editors,
 currently this library uses doc comment syntax that is more-or-less presentable
 on `clangd` – but I plan to move towards proper `doxygen` syntax once `clangd`
-will implement it (it is planned here as well).
+will implement it (soon™).
 
 ### 8. (WIP) Error handling
 
@@ -80,11 +80,20 @@ container with type-independent `void *` dynamic pointer type.
 I consider toying with the library further to offer Rust bindings for it and
 to try implement a wrapper that will make it fit the Rust ecosystem.
 
+### 10. (TODO) Dynamic buffers for `FILE` streams.
+
+I plan to introduce a platform-agnostic API for implementing various parsers
+in more sensible way than what C offers by-default – is should offer very
+user-friendly `readline`-kind of parsing files and anything that could
+benefit from dynamically-sized buffers. For security applications, I might
+need to introduce "hard limits" if neccesary but that most likely will be
+an optional API arg outside of base `vec` API.
+
 ## API
 
-…it's currently documented in-code only :(. Worry not! A proper documentation
-will be made soon™ + `doxygen` might allow for dynamic documentation generation
-once I move to it.
+…it's currently documented in-code (headers!) only :(. Worry not! A proper
+documentation will be made soon™ + `doxygen` might allow for dynamic documentation
+generation that is going to be novice-friendly once I move to it.
 
 As various library builds might use different prefixes for symbols, be aware
 API will be documented in distribution-specific way.
