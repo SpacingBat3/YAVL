@@ -23,21 +23,18 @@
 
 #ifndef @YAVL_C_NAMESPACE_UPPER_@VEC_H_STRUCT
 #define @YAVL_C_NAMESPACE_UPPER_@VEC_H_STRUCT
-#define @YAVL_C_NAMESPACE_UPPER_@VEC_H_STRUCT_IN
 /**
  * Type-agnostic vector definition
  */
 typedef struct {
-  #pragma push_macro("reserved")
-  #include <YAVL/_macro.h>
-  reserved(sizeof(void*));
-  reserved(sizeof(size_t*));
-  reserved(sizeof(size_t*));
-  reserved(sizeof(size_t*));
-  #undef reserved
-  #pragma pop_macro("reserved")
+  // meta access is unsupported!
+  char[
+    sizeof(void*)
+    +sizeof(size_t*)
+    +sizeof(size_t*)
+    +sizeof(size_t*)
+  ] _raw;
 } @YAVL_C_NAMESPACE_@vec_t;
-#undef @YAVL_C_NAMESPACE_UPPER_@VEC_H_STRUCT_IN
 #endif
 #pragma clang final(@YAVL_C_NAMESPACE_UPPER_@VEC_H_STRUCT)
 
