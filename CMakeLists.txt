@@ -23,7 +23,6 @@ add_library("${PROJECT_NAME}" STATIC "src/vec.c")
 
 set_target_properties("${PROJECT_NAME}" PROPERTIES
     PUBLIC_HEADER "${CMAKE_CURRENT_BINARY_DIR}/include/YAVL/vec.h"
-    PRIVATE_HEADER "include/YAVL/_macro.h"
 )
 
 # Target development properties
