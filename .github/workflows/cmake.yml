@@ -68,6 +68,7 @@ jobs:
       run: cmake --install '${{ steps.strings.outputs.build-output-dir }}' --config '${{ matrix.build_type }}'
 
     - name: Upload atrifacts
+      if: ${{ !env.ACT }}
       uses: actions/upload-artifact@v6
       with:
         # Artifact name
