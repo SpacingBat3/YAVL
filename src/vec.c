@@ -42,24 +42,30 @@ NS(vec_res_t) NS(vec_init)(NS(vec_t) *const vec, size_t data_align, size_t data_
 }
 
 NS(vec_res_t) NS(vec_push)(NS(vec_t) *const vec, const void *const data) {
-  if(vec==NULL) return false;
+  if(vec==NULL) return NS_UPPER(VEC_RES_NULL);
   if(vec->size >= vec->reservd) {
     vec->reservd+=5;
     void *const new = realloc(vec->data, vec->reservd*vec->allignment);
-    if(!new) return false;
-    vec->data = new;
+    if(new) vec->data = new;
+    else return NS_UPPER(VEC_RES_OOM);
   }
   if(!memcpy(vec->data+((vec->size++)*vec->allignment),
       data,vec->allignment)) {
     --vec->size;
-    return false;
+    return NS_UPPER(VEC_RES_FAIL);
   }
-  return true;
+  return NS_UPPER(VEC_RES_OK);
 }
 
 NS(vec_errorable_t) NS(vec_pop)(NS(vec_t) *const vec) {
-  if(vec==NULL) return (NS(vec_errorable_t)){.status=NS_UPPER(VEC_RES_NULL),.mem=NULL};
-  if(vec==NULL || vec->size == 0) return (NS(vec_errorable_t)){.status=NS_UPPER(VEC_RES_FAIL),.mem=NULL};
+  if(vec==NULL) return (NS(vec_errorable_t)){
+      .status=NS_UPPER(VEC_RES_NULL),
+      .mem=NULL
+  };
+  if(vec->size == 0) return (NS(vec_errorable_t)){
+      .status=NS_UPPER(VEC_RES_FAIL),
+      .mem=NULL
+  };
   return (NS(vec_errorable_t)){
     .status=NS_UPPER(VEC_RES_OK),
     .mem=vec->data+((--vec->size)*vec->allignment)
