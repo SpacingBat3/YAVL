@@ -133,7 +133,7 @@ project might be used in various other software I am involved with, and
 I might be in need to grant various entities additional priviledges
 (regardless if they violate *the GPL3 ideology* or not).
 
-> ![NOTE]
+> [!NOTE]
 > I might also switch from `GPL3-or-later` to something more permissive if I'll
 > find value in that. `GPL3` is more-or-less a license for the particular development
 > and public builds of this library. Contributors are also assumed to give their
