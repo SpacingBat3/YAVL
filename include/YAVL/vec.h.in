@@ -50,7 +50,7 @@
 typedef struct {
   /// @private
   char[
-    sizeof(void*)+(3*sizeof(size_t*))
+    sizeof(void*)+sizeof(size_t[3])
   ] _raw;
 } @YAVL_C_NAMESPACE_@vec_t;
 #else
