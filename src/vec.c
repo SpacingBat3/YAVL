@@ -31,14 +31,14 @@ typedef struct {
 
 #include <YAVL/vec.h>
 
-NS(vec_res_t) NS(vec_init)(NS(vec_t) *const vec, size_t data_align, size_t data_reserv) {
-  if(vec==NULL) return NS_UPPER(VEC_RES_NULL);
-  vec->size=0;
-  vec->reservd=(!data_reserv)?5:data_reserv;
-  vec->allignment=(!data_align)?1:data_align;
-  if(vec->data) free(vec->data);
-  vec->data=calloc(vec->reservd, vec->allignment);
-  return vec->data == NULL ? NS_UPPER(VEC_RES_OOM) : NS_UPPER(VEC_RES_OK);
+NS(vec_res_t) NS(vec_init)(NS(vec_t) *const memory, size_t data_align, size_t data_reserv) {
+  if(memory==NULL) return NS_UPPER(VEC_RES_NULL);
+  memory->size=0;
+  memory->reservd=(!data_reserv)?5:data_reserv;
+  memory->allignment=(!data_align)?1:data_align;
+  if(memory->data) free(memory->data);
+  memory->data=calloc(memory->reservd, memory->allignment);
+  return memory->data == NULL ? NS_UPPER(VEC_RES_OOM) : NS_UPPER(VEC_RES_OK);
 }
 
 NS(vec_res_t) NS(vec_push)(NS(vec_t) *const vec, const void *const data) {
@@ -140,7 +140,7 @@ NS(vec_errorable_t) NS(vec_flush)(NS(vec_t)* const vec) {
       vec->size=0;
       vec->reservd=0;
       vec->allignment=0;
-      return (NS(vec_errorable_t)){.status=status, .mem=arr};
+      return (NS(vec_errorable_t)){status, .mem=arr};
     } break;
     default:
       return (NS(vec_errorable_t)){status, .mem=NULL};

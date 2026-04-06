@@ -1,4 +1,5 @@
-# YAVL: **Y**et **A**nother **V**ector **L**ibrary
+YAVL: Yet Another Vector Library
+================================
 
 This is a a (yet another?) library that implements data structure
 for dynamically sized arrays in C, similar to C++ `vector<T>` or
@@ -6,7 +7,8 @@ Rust's `Vec<T>` types.
 
 And yeah, project name is subject to change :/.
 
-## Features
+Features
+--------
 
 ### 1. Type-independent data structure
 
@@ -89,7 +91,8 @@ benefit from dynamically-sized buffers. For security applications, I might
 need to introduce "hard limits" if neccesary but that most likely will be
 an optional API arg outside of base `vec` API.
 
-## API
+API
+---
 
 …it's currently documented in-code (headers!) only :(. Worry not! A proper
 documentation will be made soon™ + `doxygen` might allow for dynamic documentation
@@ -98,7 +101,8 @@ generation that is going to be novice-friendly once I move to it.
 As various library builds might use different prefixes for symbols, be aware
 API will be documented in distribution-specific way.
 
-## History
+History
+-------
 
 I've implemented this library for a quite a long time now, as I wanted
 to have some lightweight solution to include dynamically-sized arrays
@@ -114,7 +118,8 @@ that just does what it should do. I still see in it more potential, to
 implement an API specifically to ease development of parsing various file
 formats (be it CSV or obscure academic input data file).
 
-## License
+License
+-------
 
 See [COPYING](../COPYING) for licensing information about this project.
 

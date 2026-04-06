@@ -1,7 +1,12 @@
-/*
+/** @file
+ *
+ * Vector public API definition
+ *
  * SPDX-License: GPL-3.0-or-later
  *
- * Copyright (C) 2026 Dawid Papiewski
+ * @author Dawid Papiewski
+ * @copyright (C) 2026 Dawid Papiewski
+ *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your option)
@@ -17,132 +22,178 @@
 #ifndef @YAVL_C_NAMESPACE_UPPER_@VEC_H
 #define @YAVL_C_NAMESPACE_UPPER_@VEC_H
 #pragma clang final(@YAVL_C_NAMESPACE_UPPER_@VEC_H)
+/** @defgroup VEC_H Vector API
+ *
+ * @brief Vector API definition
+ *
+ * @{
+ */
 
 #include <stddef.h>
 #include <stdbool.h>
 
 #ifndef @YAVL_C_NAMESPACE_UPPER_@VEC_H_STRUCT
-#define @YAVL_C_NAMESPACE_UPPER_@VEC_H_STRUCT
 /**
- * Type-agnostic vector definition
+ * @brief Type-agnostic vector definition.
+ *
+ * It stores data on heap, although the metadata can be stored
+ * wherever, with stack being recommended when vector is being
+ * used as an intermediate type for array generation.
+ * The metadata has to be detached from data, as memory usage
+ * for data is assumed to be very volatile and it is preffered
+ * to drop metadata when converting to the regular C arrays.
+ *
+ * @note Metadata layout is currently not part of the public
+ * API and direct access (outside API methods) might be unstable
+ * in regard to API stability of the library.
  */
 typedef struct {
-  // meta access is unsupported!
+  /// @private
   char[
-    sizeof(void*)
-    +sizeof(size_t*)
-    +sizeof(size_t*)
-    +sizeof(size_t*)
+    sizeof(void*)+(3*sizeof(size_t*))
   ] _raw;
 } @YAVL_C_NAMESPACE_@vec_t;
+#else
+#undef @YAVL_C_NAMESPACE_UPPER_@VEC_H_STRUCT
 #endif
-#pragma clang final(@YAVL_C_NAMESPACE_UPPER_@VEC_H_STRUCT)
 
-/// Allocator for @YAVL_C_NAMESPACE_@vec_t
+/// @def @YAVL_C_NAMESPACE_UPPER_@VEC_T_ALLOCATOR
+/// @brief Allocator for @YAVL_C_NAMESPACE_@vec_t
 #define @YAVL_C_NAMESPACE_UPPER_@VEC_T_ALLOCATOR ((@YAVL_C_NAMESPACE_@vec_t){})
 
+/// @brief Operation result codes
 typedef enum : char {
-  /// Out-of-memory, allocator failures
+  /// @brief Out-of-memory, allocator failures
   @YAVL_C_NAMESPACE_UPPER_@VEC_RES_OOM = -2,
-  /// Null pointer exception
+  /// @brief Null pointer exception
   @YAVL_C_NAMESPACE_UPPER_@VEC_RES_NULL,
-  /// Operation success
+  /// @brief Operation success
   @YAVL_C_NAMESPACE_UPPER_@VEC_RES_OK = 0,
-  /// Generic operation failure
+  /// @brief Generic operation failure
   @YAVL_C_NAMESPACE_UPPER_@VEC_RES_FAIL,
 } @YAVL_C_NAMESPACE_@vec_res_t;
 
+/**
+ * @brief A return package which contains both result code
+ * and data.
+ */
 typedef struct {
+  /// @brief Operation status (error code)
   @YAVL_C_NAMESPACE_@vec_res_t status;
+  /// @brief Data pointer, might be NULL on fatal failures.
   void *const mem;
 } @YAVL_C_NAMESPACE_@vec_errorable_t;
 
 /**
- * Initializes a new vector. Frees memory if it is already allocated.
+ * @brief Initializes a new vector. Frees memory if it is already allocated.
  *
- * Pointer safety: data pointer is external, argument expects allocated space for object.
+ * @param memory An initialized memory space address to store metadata.
+ * @param data_align A (maximum) size of element to store.
+ * @param data_reserv Default reservation to avoid frequent reallocations.
  *
- * Returns: operation status (1 - success, 0 - failure)
+ * @return Operation status.
  */
 @YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_init(@YAVL_C_NAMESPACE_@vec_t *const memory,size_t data_align,size_t data_reserv);
 /**
- * Pushes data to vector.
+ * @brief Pushes data to vector.
  *
- * Pointer safety: vec is after init, data has same size as vector allignment.
+ * @param vec Fully initialized vector to push to.
+ * @param data Pointer to data which should been pushed. Has to match data allignment.
  *
- * Returns: operation status (1 - success, 0 - failure)
+ * @return Operation status.
  */
 @YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_push(@YAVL_C_NAMESPACE_@vec_t *const vec, const void *const data);
 /**
- * Pops last elements out of vector. Doesn't free memory yet.
+ * @brief Pops last elements out of vector. Doesn't free memory yet.
  *
- * Pointer safety: vec is after init, data from returned pointer should be copied before "fit" operation.
+ * @param vec Fully initialized vector to pop from.
  *
- * Returns: pointer of last element that was removed.
+ * @return Pointer of last element that was removed.
  */
 @YAVL_C_NAMESPACE_@vec_errorable_t @YAVL_C_NAMESPACE_@vec_pop(@YAVL_C_NAMESPACE_@vec_t *const vec);
 /**
- * Resizes vector space to the current size.
+ * @brief Resizes vector space to the current size.
  *
- * Pointer safety: vec is after init, DO NOT USE when there's pointer to data.
+ * DO NOT USE when there's external pointer to data,
+ * as `fit` will free the data on vector it points to.
+ * YOU are expected to resolve conflicts like that yourself,
+ * e.g. simply by copying data out of vector.
  *
- * Returns: operation status (1 - success, 0 - failure)
+ * There's also a way to test such pointer freshness on
+ * vector metadata, albeit it might require synchronization
+ * for multi-threaded logic to avoid race conditions.
+ *
+ * @param vec Fully initialized vector.
+ *
+ * @return Operation status (failures usually mean bad
+ * allocator, as data shrinking in practice should not
+ * cause OOM conditions).
  */
 @YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_fit(@YAVL_C_NAMESPACE_@vec_t* const vec);
 /**
- * Sets `offset` -th element of vector to `data`.
- * ---
+ * @brief Sets `offset` -th element of vector to `data`.
  *
- * Pointer safety: vec is after init, data has same size as vector allignment.
+ * @param vec Fully initialized vector.
+ * @param offset Place in which write `data` to vector.
+ * @param data Memory pointer with same size as vector allignment.
  *
- * Returns: operation status (1 - success, 0 - failure)
+ * @return Operation status.
  */
 @YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_set(@YAVL_C_NAMESPACE_@vec_t* const vec, size_t offset, const void *const data);
 /**
- * Gets element at `offset` and stores it in `out` memory.
- * ---
+ * @brief Gets element at `offset` and stores it in `out` memory.
  *
- * Pointer safety: vec is after init, out has same size as vector allignment.
+ * @param vec Fully initialized vector.
+ * @param offset Place from which get vector element to store to `out`.
+ * @param out Memory pointer with same size as vector allignment.
  *
- * Returns: operation status (1 - success, 0 - failure)
+ * @return Operation status.
  */
 @YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_get(@YAVL_C_NAMESPACE_@vec_t* const vec, size_t offset, void *const out);
 /**
- * Get reference to dynamic vector array.
+ * @brief Get reference to dynamic vector array.
  *
- * This is supposed to be used on-par with vec_chkptr for an adequate
+ * This is supposed to be used on-par with `vec_chkptr` for an adequate
  * pointer safety.
+ *
+ * @param vec Fully initialized vector.
+ *
+ * @return Operation status.
  */
 @YAVL_C_NAMESPACE_@vec_errorable_t @YAVL_C_NAMESPACE_@vec_ref(@YAVL_C_NAMESPACE_@vec_t* const vec);
 /**
- * Frees memory in vector and zeroes the entire object.
- * Also returns empty vector for initialization.
+ * @brief Frees heap in vector and zeroes the entire object.
+ *
+ * @return Empty vector ready for initialization.
  */
 @YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_free(@YAVL_C_NAMESPACE_@vec_t* const vec);
 /**
- * Try to validate if the `ptr` pointer is in bounds of `vec` vector. This might be
+ * @brief Try to validate if the `ptr` pointer is in bounds of `vec` vector. This might be
  * useful to ensure freshness of the `ptr` and protect it against out-of-memory-bounds
  * scenarios.
- *
- * ---
  *
  * This is additional safety measure. You should still manage your memory on your own
  * for the most optimal case scenarios. NO GUARANTEES ARE MADE THIS WILL SOLVE EVERY
  * OVERFLOW, BUG OR MEMORY-RELATED ISSUES and especially be aware of multi-thread software
  * where a race condition between check and access might be happening (you might need
  * to synchronize check and access between threads).
+ *
+ * @param vec Fully initialized vector used for validation.
+ * @param ptr Pointer to validate.
+ *
+ * @return Pointer correctness in regard to vector boundaries.
  */
 bool @YAVL_C_NAMESPACE_@vec_chkptr(const @YAVL_C_NAMESPACE_@vec_t* const vec, const void *const ptr);
 /**
- * Finalizes vector, to result it in statically-sized array.
+ * @brief Finalizes vector, to result it in statically-sized array.
  * This allows you to drop vector metadata.
- * ---
  *
- * Pointer safety: vec is after init, becomes pre-init,
- * returned pointer is in heap and needs to be freed.
+ * @param vec Fully initialized vector, that will become correctly uninitialized.
  *
- * Returns: Pointer to heap memory (needs to be freed).
+ * @return Pointer to array stored in heap. Needs to be freed via allocator at
+ * some point it becomes unnecesary or no longer accesible.
  */
 @YAVL_C_NAMESPACE_@vec_errorable_t @YAVL_C_NAMESPACE_@vec_flush(@YAVL_C_NAMESPACE_@vec_t* const vec);
 
+/** @} */ // VEC_H
 #endif /* @YAVL_C_NAMESPACE_UPPER_@VEC_H */
