@@ -59,12 +59,12 @@ slower copy-alike data return.
 Library well defines what it will done with the input arguments and whether they
 will be modified or not.
 
-### 7. In-code CLANGD-compatible documentation
+### 7. In-code Doxygen compatible documentation
 
-As I use `clangd` for my C language server for various IDEs and code editors,
-currently this library uses doc comment syntax that is more-or-less presentable
-on `clangd` – but I plan to move towards proper `doxygen` syntax once `clangd`
-will implement it (soon™).
+The library API is fully documented via Doxygen, meaning it is presentable well
+on various C/C++ LSP providers that follow Doxygen standard and supports
+detalied auto-generated API documentation generation to HTML via Doxygen,
+as part of CMake build/install pipeline.
 
 ### 8. (WIP) Error handling
 
@@ -94,12 +94,16 @@ an optional API arg outside of base `vec` API.
 API
 ---
 
-…it's currently documented in-code (headers!) only :(. Worry not! A proper
-documentation will be made soon™ + `doxygen` might allow for dynamic documentation
-generation that is going to be novice-friendly once I move to it.
+Currently, API is properly documentated via doc comments in header files.
+This documentation uses `doxygen` and offers offline HTML docs that
+describe the library in-detail.
+
+An online-published variant of the documentation is being worked on
+and will be available on GitHub pages.
 
 As various library builds might use different prefixes for symbols, be aware
-API will be documented in distribution-specific way.
+API will be documented in distribution-specific way (i.e. default prefix
+for symbols will be used, following the CI/CD pipeline).
 
 History
 -------
@@ -125,4 +129,15 @@ See [COPYING](../COPYING) for licensing information about this project.
 
 Take note that another releases of this project, including academic ones,
 might be a subject to exclusive licensing terms and conditions, as this
-project might be used in various other software I am involved with.
+project might be used in various other software I am involved with, and
+I might be in need to grant various entities additional priviledges
+(regardless if they violate *the GPL3 ideology* or not).
+
+> ![NOTE]
+> I might also switch from `GPL3-or-later` to something more permissive if I'll
+> find value in that. `GPL3` is more-or-less a license for the particular development
+> and public builds of this library. Contributors are also assumed to give their
+> ownership rights to the code to sole author of this library or use more permissive
+> licensing on request, else their contribution might not get acknowledged at all
+> (i.e. I won't be even reading your source code and I might close MR/PR without any
+> feedback).
