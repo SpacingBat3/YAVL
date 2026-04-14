@@ -1,0 +1,5 @@
+--matrix=os:ubuntu-latest
+--matrix=c_compiler:gcc
+--rm=true
+--artifact-server-path=build/act
+--platform=ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest
