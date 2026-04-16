@@ -1,0 +1,61 @@
+# Simple workflow for deploying Doxygen to GitHub Pages
+name: Deploy Doxygen to Pages
+
+on:
+  push:
+    branches: ["master"]
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name:    Build documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '4.2.x'
+      - name: Setup Doxygen
+        run: |
+          sudo apt-get update
+          sudo apt-get install doxygen
+      - name: Set reusable strings
+        id: strings
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+      - name: Configure CMake
+        run: >
+          cmake -B '${{ steps.strings.outputs.build-output-dir }}'
+          -DCMAKE_BUILD_TYPE=Debug
+          -S '${{ github.workspace }}'
+      - name: Generate documentation
+        run:  cmake --build '${{ steps.strings.outputs.build-output-dir }}' --target YAVLDocs
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '${{ steps.strings.outputs.build-output-dir }}/html'
+  deploy:
+    name:    Deploy documentation
+    runs-on: ubuntu-slim
+    needs:   build
+    environment:
+      name:  github-pages
+      url:   ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id:   deployment
+        uses: actions/deploy-pages@v4
