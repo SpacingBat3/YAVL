@@ -30,9 +30,9 @@ jobs:
         with:
           cmake-version: '4.2.x'
       - name: Setup Doxygen
-        run: |
-          sudo apt-get update
-          sudo apt-get install doxygen
+        uses: AdarshRawat1/Install-Doxygen@9d4e4482ddeb8ebe93423b8dbfa2b2bafd815e72
+        with:
+          version: '1.16.1'
       - name: Set reusable strings
         id: strings
         run: |
