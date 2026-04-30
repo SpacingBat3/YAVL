@@ -22,20 +22,22 @@ for values.
 Library offers convenient operations like `push` or `pop` – with
 additional resizing of the array if it becomes a neccesity.
 
-### 3. Vector container type abstraction
-
-Library does not allow any program to access type fields – only
-size is well-known to be able to reserve memory for the vector
-metadata. Access to raw properties is prohibited nor part of 
-the public API.
-
-### 4. CMake build infrastructure integration
+### 3. CMake build infrastructure integration
 
 The project is designed to be easily integrated into another projects
 – it offers defining a personal symbol namespace (prefix) to avoid type
 collision with another library (or to have more fitting namespace for your
 use case scenario) and also properly exposes CMake metadata to use and depend
 on it as on any other library you can in CMake.
+
+### 4. Common Package Spec support
+
+Outside of CMake, a deployed builds offer a [Common Package Specification][cps]
+metadata for machines with relatively new CMake version installed, so you can 
+integrate it with any tooling to manage your dependencies: CPS offers a more 
+feature-rich package description than `pkg-config` while not requiring any tooling 
+to be `cmake` at some part or another. CPS is still relatively fresh, so adoption 
+across tooling might be limited.
 
 ### 5. Pointer validation mechanisms & safety policy
 
@@ -141,3 +143,5 @@ I might be in need to grant various entities additional priviledges
 > licensing on request, else their contribution might not get acknowledged at all
 > (i.e. I won't be even reading your source code and I might close MR/PR without any
 > feedback).
+
+[CPS]: https://cps-org.github.io
