@@ -81,6 +81,12 @@ configure_file(
   "${CMAKE_CURRENT_BINARY_DIR}/include/YAVL/vec.h"
 )
 
+# Arch PKGBUILD
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/template/build/PKGBUILD.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/scripts/PKGBUILD"
+)
+
 # Installation
 
 configure_package_config_file(
