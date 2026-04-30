@@ -32,7 +32,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#ifndef @YAVL_C_NAMESPACE_UPPER_@VEC_H_STRUCT
 /**
  * @brief Type-agnostic vector definition.
  *
@@ -43,19 +42,29 @@
  * for data is assumed to be very volatile and it is preffered
  * to drop metadata when converting to the regular C arrays.
  *
- * @note Metadata layout is currently not part of the public
- * API and direct access (outside API methods) might be unstable
- * in regard to API stability of the library.
+ * @note Read-write and manual structure definition is currently
+ * discouraged and may cause undefined behaviour. With that being
+ * said, metadata needs to be allocated in read-write memory space.
+ * In the future, access to struct might be greatly limited to
+ * limit unsafe access to vector.
  */
 typedef struct {
-  /// @private
-  char[
-    sizeof(void*)+sizeof(size_t[3])
-  ] _raw;
+  /// @brief Pointer to data array.
+  ///
+  /// Raw access is considered unsafe and requires additional
+  /// memory checks done automatically by the library.
+  void* data;
+  /// @brief Current data allignment.
+  size_t allign;
+  /// @brief Current data length.
+  ///
+  /// Should be used for array bounds.
+  size_t len;
+  /// @brief Currently reserved data.
+  ///
+  /// Should be used for memory calculations.
+  size_t reservd;
 } @YAVL_C_NAMESPACE_@vec_t;
-#else
-#undef @YAVL_C_NAMESPACE_UPPER_@VEC_H_STRUCT
-#endif
 
 /// @def @YAVL_C_NAMESPACE_UPPER_@VEC_T_ALLOCATOR
 /// @brief Allocator for @YAVL_C_NAMESPACE_@vec_t
@@ -87,13 +96,26 @@ typedef struct {
 /**
  * @brief Initializes a new vector. Frees memory if it is already allocated.
  *
- * @param memory An initialized memory space address to store metadata.
+ * @param vec An initialized vector metadata memory.
  * @param data_align A (maximum) size of element to store.
  * @param data_reserv Default reservation to avoid frequent reallocations.
  *
  * @return Operation status.
  */
-@YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_init(@YAVL_C_NAMESPACE_@vec_t *const memory,size_t data_align,size_t data_reserv);
+@YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_init(@YAVL_C_NAMESPACE_@vec_t *const vec,size_t data_align,size_t data_reserv);
+/**
+ * @brief Converts given statically-sized array to the dynamic ones.
+ * 
+ * The created vector is fully-fitted to the array, so it might be
+ * required to reserve more memory for it.
+ *
+ * @param vec Fully initialized vector, that will become correctly uninitialized.
+ * @param array Array which should be transformed to a vector.
+ *
+ * @return Pointer to array stored in heap. Needs to be freed via allocator at
+ * some point it becomes unnecesary or no longer accesible.
+ */
+@YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_fromarray(@YAVL_C_NAMESPACE_@vec_t *const vec,void *const array, const size_t alignment,const size_t length);
 /**
  * @brief Pushes data to vector.
  *
@@ -151,17 +173,6 @@ typedef struct {
  */
 @YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_get(@YAVL_C_NAMESPACE_@vec_t* const vec, size_t offset, void *const out);
 /**
- * @brief Get reference to dynamic vector array.
- *
- * This is supposed to be used on-par with `vec_chkptr` for an adequate
- * pointer safety.
- *
- * @param vec Fully initialized vector.
- *
- * @return Operation status.
- */
-@YAVL_C_NAMESPACE_@vec_errorable_t @YAVL_C_NAMESPACE_@vec_ref(@YAVL_C_NAMESPACE_@vec_t* const vec);
-/**
  * @brief Frees heap in vector and zeroes the entire object.
  *
  * @return Empty vector ready for initialization.
@@ -189,11 +200,12 @@ bool @YAVL_C_NAMESPACE_@vec_chkptr(const @YAVL_C_NAMESPACE_@vec_t* const vec, co
  * This allows you to drop vector metadata.
  *
  * @param vec Fully initialized vector, that will become correctly uninitialized.
+ * @param final_len Where to store logical array length, required.
  *
  * @return Pointer to array stored in heap. Needs to be freed via allocator at
  * some point it becomes unnecesary or no longer accesible.
  */
-@YAVL_C_NAMESPACE_@vec_errorable_t @YAVL_C_NAMESPACE_@vec_flush(@YAVL_C_NAMESPACE_@vec_t* const vec);
+@YAVL_C_NAMESPACE_@vec_errorable_t @YAVL_C_NAMESPACE_@vec_toarray(@YAVL_C_NAMESPACE_@vec_t* const vec, size_t *const final_len);
 
 /** @} */ // VEC_H
 #endif /* @YAVL_C_NAMESPACE_UPPER_@VEC_H */
