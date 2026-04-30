@@ -105,7 +105,7 @@ typedef struct {
 @YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_init(@YAVL_C_NAMESPACE_@vec_t *const vec,size_t data_align,size_t data_reserv);
 /**
  * @brief Converts given statically-sized array to the dynamic ones.
- * 
+ *
  * The created vector is fully-fitted to the array, so it might be
  * required to reserve more memory for it.
  *

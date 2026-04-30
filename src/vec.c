@@ -86,13 +86,15 @@ NS(vec_res_t) NS( vec_fit )(NS(vec_t)* const vec) {
   if(vec == NULL) return NS_UPPER(VEC_RES_NULL);
   // Already alligned
   if(vec->reservd == vec->len) return NS_UPPER(VEC_RES_OK);
-  #endif
   // Resize memory allocated to memory taken
   void *const new = realloc(vec->data, vec->len*vec->allign);
   // Realloc check for very bad allocators
   if(!new) return NS_UPPER(VEC_RES_OOM);
-  vec->reservd=vec->len;
   vec->data = new;
+  #else
+  vec->data = realloc(vec->data, vec->len*vec->allign);
+  #endif
+  vec->reservd=vec->len;
   // We're good
   return NS_UPPER(VEC_RES_OK);
 }
@@ -149,7 +151,7 @@ bool NS( vec_chkptr )(const NS(vec_t)* const vec, const void *const ptr) {
 
 NS(vec_errorable_t) NS( vec_toarray )(NS(vec_t)* const vec, size_t *const final_len) {
   #ifdef YAVL_FAST
-  NS(vec_res_t) status = vec->len==vec->reservd ? NS_UPPER(VEC_RES_OK) : NS_UPPER(VEC_RES_OOM)
+  NS(vec_res_t) status = vec->len==vec->reservd ? NS_UPPER(VEC_RES_OK) : NS_UPPER(VEC_RES_OOM);
   #else
   NS(vec_res_t) status = NS(vec_fit)(vec);
   if(final_len == NULL) status = NS_UPPER(VEC_RES_NULL);

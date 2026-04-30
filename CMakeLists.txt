@@ -9,13 +9,13 @@ include(CMakePackageConfigHelpers)
 
 find_package(Doxygen OPTIONAL_COMPONENTS doxygen)
 
-# In-code namespace for Library
+# Options & configurables
 
 set(CACHE{YAVL_C_NAMESPACE}
     TYPE STRING
     HELP "A prefix for exported C symbols in the library"
-    VALUE "yavl"
-)
+    VALUE "yavl")
+option(YAVL_FAST "Sacrifice stability/safety for performance" OFF)
 message(VERBOSE "YAVL: C symbol namespace: ${YAVL_C_NAMESPACE}")
 
 # Target list
@@ -72,6 +72,10 @@ if(YAVL_C_NAMESPACE)
         "YAVL_C_NAMESPACE=${YAVL_C_NAMESPACE}"
         "YAVL_C_NAMESPACE_UPPER=${YAVL_C_NAMESPACE_UPPER}"
     )
+endif()
+
+if(YAVL_FAST)
+  target_compile_definitions("${PROJECT_NAME}Object" PRIVATE "YAVL_FAST=1")
 endif()
 
 # Header generation
