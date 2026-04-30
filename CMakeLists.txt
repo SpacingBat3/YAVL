@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 4.2)
 project(YAVL
   DESCRIPTION "Yet Another Vector Library – still better than C++ impl. :P"
   VERSION 0.1.0
-  SPDX_LICENSE "GPL-3.0-or-later"
   LANGUAGES C
 )
 include(GNUInstallDirs)
@@ -147,7 +146,7 @@ if(CMAKE_MAJOR_VERSION GREATER_EQUAL 4
   install(PACKAGE_INFO "${PROJECT_NAME}"
     EXPORT "${PROJECT_NAME}Targets"
     VERSION "${PROJECT_VERSION}"
-    LICENSE "${PROJECT_SPDX_LICENSE}"
+    LICENSE "GPL-3.0-or-later"
     VERSION_SCHEMA simple
     COMPONENT "CPS")
 endif()
