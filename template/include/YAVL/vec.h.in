@@ -22,15 +22,50 @@
 #ifndef @YAVL_C_NAMESPACE_UPPER_@VEC_H
 #define @YAVL_C_NAMESPACE_UPPER_@VEC_H
 #pragma clang final(@YAVL_C_NAMESPACE_UPPER_@VEC_H)
-/** @defgroup VEC_H Vector API
+#include <stddef.h>
+#include <stdbool.h>
+
+/** @defgroup ERR Error handling API
+ *
+ * @brief Error handling and reporting API,
+ * allowing for recovery on error, cleanup
+ * and additional safety guards before data
+ * access.
+ *
+ * @{
+ */
+
+/// @brief Operation result codes
+typedef enum : char {
+  /// @brief Out-of-memory, allocator failures
+  @YAVL_C_NAMESPACE_UPPER_@VEC_RES_OOM = -2,
+  /// @brief Null pointer exception
+  @YAVL_C_NAMESPACE_UPPER_@VEC_RES_NULL,
+  /// @brief Operation success
+  @YAVL_C_NAMESPACE_UPPER_@VEC_RES_OK = 0,
+  /// @brief Generic operation failure
+  @YAVL_C_NAMESPACE_UPPER_@VEC_RES_FAIL,
+} @YAVL_C_NAMESPACE_@vec_res_t;
+
+/**
+ * @brief A return package which contains both result code
+ * and data.
+ */
+typedef struct {
+  /// @brief Operation status (error code)
+  @YAVL_C_NAMESPACE_@vec_res_t status;
+  /// @brief Data pointer, might be NULL on fatal failures.
+  void *const mem;
+} @YAVL_C_NAMESPACE_@vec_errorable_t;
+
+/** @} */ // ERR
+
+/** @defgroup VEC Vector API
  *
  * @brief Vector API definition
  *
  * @{
  */
-
-#include <stddef.h>
-#include <stdbool.h>
 
 /**
  * @brief Type-agnostic vector definition.
@@ -69,29 +104,6 @@ typedef struct {
 /// @def @YAVL_C_NAMESPACE_UPPER_@VEC_T_ALLOCATOR
 /// @brief Allocator for @YAVL_C_NAMESPACE_@vec_t
 #define @YAVL_C_NAMESPACE_UPPER_@VEC_T_ALLOCATOR ((@YAVL_C_NAMESPACE_@vec_t){})
-
-/// @brief Operation result codes
-typedef enum : char {
-  /// @brief Out-of-memory, allocator failures
-  @YAVL_C_NAMESPACE_UPPER_@VEC_RES_OOM = -2,
-  /// @brief Null pointer exception
-  @YAVL_C_NAMESPACE_UPPER_@VEC_RES_NULL,
-  /// @brief Operation success
-  @YAVL_C_NAMESPACE_UPPER_@VEC_RES_OK = 0,
-  /// @brief Generic operation failure
-  @YAVL_C_NAMESPACE_UPPER_@VEC_RES_FAIL,
-} @YAVL_C_NAMESPACE_@vec_res_t;
-
-/**
- * @brief A return package which contains both result code
- * and data.
- */
-typedef struct {
-  /// @brief Operation status (error code)
-  @YAVL_C_NAMESPACE_@vec_res_t status;
-  /// @brief Data pointer, might be NULL on fatal failures.
-  void *const mem;
-} @YAVL_C_NAMESPACE_@vec_errorable_t;
 
 /**
  * @brief Initializes a new vector. Frees memory if it is already allocated.
@@ -228,5 +240,5 @@ bool @YAVL_C_NAMESPACE_@vec_chkptr(const @YAVL_C_NAMESPACE_@vec_t* const vec, co
  */
 @YAVL_C_NAMESPACE_@vec_errorable_t @YAVL_C_NAMESPACE_@vec_toarray(@YAVL_C_NAMESPACE_@vec_t* const vec, size_t *const final_len);
 
-/** @} */ // VEC_H
+/** @} */ // VEC
 #endif /* @YAVL_C_NAMESPACE_UPPER_@VEC_H */
