@@ -1,0 +1,5 @@
+@PACKAGE_INIT@
+
+set(YAVL_C_NAMESPACE @YAVL_C_NAMESPACE@)
+
+check_required_components(@PROJECT_NAME@)
