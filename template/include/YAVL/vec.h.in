@@ -153,6 +153,27 @@ typedef struct {
  */
 @YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_fit(@YAVL_C_NAMESPACE_@vec_t* const vec);
 /**
+ * @brief Resizes memory space to the given size.
+ *
+ * DO NOT USE when there's external pointer to data,
+ * as `scale` in case of shrinking the memory might free
+ * the data on vector it points to. YOU are expected to
+ * resolve conflicts like that yourself, e.g. simply by
+ * copying data out of vector.
+ *
+ * There's also a way to test such pointer freshness on
+ * vector metadata, albeit it might require synchronization
+ * for multi-threaded logic to avoid race conditions.
+ *
+ * @param vec Fully initialized vector.
+ * @param new_reservd New memory space size to use for
+ * vector data, if smaller than length it will cut out
+ * data.
+ *
+ * @return Operation status (OK/OOMs).
+ */
+@YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_scale(@YAVL_C_NAMESPACE_@vec_t* const vec,size_t new_reservd);
+/**
  * @brief Sets `offset` -th element of vector to `data`.
  *
  * @param vec Fully initialized vector.

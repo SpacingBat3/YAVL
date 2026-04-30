@@ -97,6 +97,20 @@ NS(vec_res_t) NS( vec_fit )(NS(vec_t)* const vec) {
   return NS_UPPER(VEC_RES_OK);
 }
 
+NS(vec_res_t) NS( vec_scale )(NS(vec_t)* const vec, size_t new_reservd) {
+    #ifndef YAVL_FAST
+    if(vec == NULL) return NS_UPPER(VEC_RES_NULL);
+    // Already alligned
+    if(vec->reservd == new_reservd) return NS_UPPER(VEC_RES_OK);
+    #endif
+    void *const new = realloc(vec->data, new_reservd*vec->allign);
+    if(!new) return NS_UPPER(VEC_RES_OOM);
+    vec->data = new;
+    vec->len = vec->len < new_reservd ? vec->len : new_reservd;
+    vec->reservd = new_reservd;
+    return NS_UPPER(VEC_RES_OK);
+}
+
 NS(vec_res_t) NS( vec_set )(NS(vec_t)* const vec, size_t offset, const void *const data) {
   #ifndef YAVL_FAST
   // Simple bound checks
