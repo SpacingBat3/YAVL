@@ -136,18 +136,20 @@ typedef struct {
  *
  * @param vec Fully initialized vector to push to.
  * @param data Pointer to data which should been pushed. Has to match data allignment.
+ * @param num_el Number of elements in data to push into vector.
  *
  * @return Operation status.
  */
-@YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_push(@YAVL_C_NAMESPACE_@vec_t *const vec, const void *const data);
+@YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@vec_push(@YAVL_C_NAMESPACE_@vec_t *const vec, const void *const data, const size_t num_el);
 /**
  * @brief Pops last elements out of vector. Doesn't free memory yet.
  *
  * @param vec Fully initialized vector to pop from.
+ * @param num_el Number of elements in vector to pop out as array.
  *
  * @return Pointer of last element that was removed.
  */
-@YAVL_C_NAMESPACE_@vec_errorable_t @YAVL_C_NAMESPACE_@vec_pop(@YAVL_C_NAMESPACE_@vec_t *const vec);
+@YAVL_C_NAMESPACE_@vec_errorable_t @YAVL_C_NAMESPACE_@vec_pop(@YAVL_C_NAMESPACE_@vec_t *const vec, const size_t num_el);
 /**
  * @brief Resizes vector space to the current size.
  *

@@ -46,38 +46,39 @@ NS(vec_res_t) NS( vec_fromarray )(NS(vec_t) *const vec, void *const array, const
     return NS_UPPER(VEC_RES_OK);
 }
 
-NS(vec_res_t) NS( vec_push )(NS(vec_t) *const vec, const void *const data) {
+NS(vec_res_t) NS( vec_push )(NS(vec_t) *const vec, const void *const data, const size_t num_el) {
   #ifndef YAVL_FAST
   if(vec==NULL) return NS_UPPER(VEC_RES_NULL);
   #endif
-  if(vec->len >= vec->reservd) {
+  if(vec->len+num_el > vec->reservd) {
     vec->reservd*=2;
+    if(vec->reservd-vec->len < num_el) vec->reservd += num_el;
     void *const new = realloc(vec->data, vec->reservd*vec->allign);
     if(new) vec->data = new;
     else return NS_UPPER(VEC_RES_OOM);
   }
-  if(memcpy(vec->data+((vec->len++)*vec->allign),
-      data,vec->allign)) {
+  if(memcpy(vec->data+((vec->len+=num_el)*vec->allign),
+      data,vec->allign*num_el)) {
     return NS_UPPER(VEC_RES_OK);
   }
   --vec->len;
   return NS_UPPER(VEC_RES_FAIL);
 }
 
-NS(vec_errorable_t) NS( vec_pop )(NS(vec_t) *const vec) {
+NS(vec_errorable_t) NS( vec_pop )(NS(vec_t) *const vec, const size_t num_el) {
   #ifndef YAVL_FAST
-  if(vec==NULL) return (NS(vec_errorable_t)){
+  if(vec==NULL || !num_el) return (NS(vec_errorable_t)){
       .status=NS_UPPER(VEC_RES_NULL),
       .mem=NULL
   };
   #endif
-  if(vec->len == 0) return (NS(vec_errorable_t)){
+  if(vec->len < num_el) return (NS(vec_errorable_t)){
       .status=NS_UPPER(VEC_RES_FAIL),
       .mem=NULL
   };
   return (NS(vec_errorable_t)){
     .status=NS_UPPER(VEC_RES_OK),
-    .mem=vec->data+((--vec->len)*vec->allign)
+    .mem=vec->data+((vec->len-=num_el)*vec->allign)
   };
 }
 
