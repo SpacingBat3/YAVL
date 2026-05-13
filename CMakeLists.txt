@@ -9,8 +9,33 @@ include(CMakePackageConfigHelpers)
 
 find_package(Doxygen OPTIONAL_COMPONENTS doxygen)
 
-# Options & configurables
+# CMake defaults overrides
+# ========================
+### 1. Build type
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo)
+endif()
+### 2. Output paths
+if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dist/${CMAKE_BUILD_TYPE}")
+endif()
+if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dist/${CMAKE_BUILD_TYPE}")
+endif()
+if(NOT CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dist/${CMAKE_BUILD_TYPE}")
+endif()
+set("${PROJECT_NAME}_GEN_HEADERS_OUTPUT_DIRECTORY" "${CMAKE_CURRENT_BINARY_DIR}/include")
+set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs")
 
+### 3. Development-centered settings
+if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # CLANGD requirements
+endif()
+
+# Options & tunables
+# ==================
+## 1. Namespace
 set(CACHE{YAVL_C_NAMESPACE}
     TYPE STRING
     HELP "A prefix for exported C symbols in the library"
@@ -18,8 +43,13 @@ set(CACHE{YAVL_C_NAMESPACE}
 option(YAVL_FAST "Sacrifice stability/safety for performance" OFF)
 message(VERBOSE "YAVL: C symbol namespace: ${YAVL_C_NAMESPACE}")
 
-# Target list
+## 2. List of auto-generated headers
+set("${PROJECT_NAME}_GEN_HEADERS" "vec.h")
 
+# Target list
+# ===========
+add_library("${PROJECT_NAME}Interface"
+  INTERFACE)
 add_library("${PROJECT_NAME}Object"
   OBJECT "src/vec.c")
 add_library("${PROJECT_NAME}"
@@ -34,16 +64,11 @@ if(Doxygen_FOUND)
     "${CMAKE_CURRENT_SOURCE_DIR}/docs/Readme.md")
   doxygen_add_docs("${PROJECT_NAME}Docs"
     "${CMAKE_CURRENT_SOURCE_DIR}/docs/Readme.md"
-    "${CMAKE_CURRENT_BINARY_DIR}/include/YAVL/vec.h"
+    "${${PROJECT_NAME}_GEN_HEADERS_OUTPUT_DIRECTORY}/YAVL/"
   )
 endif()
 
-# Target install properties
-
-set_target_properties("${PROJECT_NAME}" PROPERTIES
-    PUBLIC_HEADER "${CMAKE_CURRENT_BINARY_DIR}/include/YAVL/vec.h"
-)
-
+# Make shared library output be called the same as static ones.
 set_target_properties("${PROJECT_NAME}Shared" PROPERTIES
     OUTPUT_NAME "${PROJECT_NAME}"
 )
@@ -57,7 +82,7 @@ foreach(target "${PROJECT_NAME}"
   # Target development properties
   target_include_directories("${target}" PUBLIC
       "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-      "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+      "$<BUILD_INTERFACE:${${PROJECT_NAME}_GEN_HEADERS_OUTPUT_DIRECTORY}>"
       "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 endforeach()
 
@@ -78,27 +103,40 @@ if(YAVL_FAST)
   target_compile_definitions("${PROJECT_NAME}Object" PRIVATE "YAVL_FAST=1")
 endif()
 
-# Header generation
-configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/template/include/YAVL/vec.h.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/include/YAVL/vec.h"
-)
+# Header generation and inclusion to API
+# ======================================
+foreach(header "${${PROJECT_NAME}_GEN_HEADERS}")
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/template/include/YAVL/${header}.in"
+    "${${PROJECT_NAME}_GEN_HEADERS_OUTPUT_DIRECTORY}/YAVL/${header}"
+  )
+  target_sources("${PROJECT_NAME}Interface" PUBLIC
+    FILE_SET HEADERS
+    TYPE HEADERS
+    BASE_DIRS
+      "${CMAKE_CURRENT_SOURCE_DIR}/include"
+      "${${PROJECT_NAME}_GEN_HEADERS_OUTPUT_DIRECTORY}"
+    FILES
+      "${${PROJECT_NAME}_GEN_HEADERS_OUTPUT_DIRECTORY}/YAVL/${header}"
+  )
+endforeach()
 
 # Arch PKGBUILD
+# =============
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/template/build/PKGBUILD.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/scripts/PKGBUILD"
+  "${CMAKE_CURRENT_BINARY_DIR}/meta/archlinux/PKGBUILD"
 )
 
 # Installation
-
+# ============
 configure_package_config_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/template/build/config.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/meta/cmake/${PROJECT_NAME}Config.cmake"
   INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
 )
 write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/meta/cmake/${PROJECT_NAME}ConfigVersion.cmake"
   COMPATIBILITY SameMinorVersion
 )
 export(PACKAGE "${PROJECT_NAME}")
@@ -108,27 +146,24 @@ install(EXPORT "${PROJECT_NAME}Targets"
     COMPONENT "CMake"
 )
 install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/meta/cmake/${PROJECT_NAME}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/meta/cmake/${PROJECT_NAME}ConfigVersion.cmake"
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
   COMPONENT "CMake"
 )
 export(EXPORT "${PROJECT_NAME}Targets")
 install(TARGETS
       "${PROJECT_NAME}"
+      "${PROJECT_NAME}Interface"
       "${PROJECT_NAME}Shared"
     EXPORT "${PROJECT_NAME}Targets"
+    FILE_SET HEADERS
+      COMPONENT "Development"
     ARCHIVE
       COMPONENT "StaticLibrary"
     LIBRARY
       COMPONENT "SharedLibrary"
       NAMELINK_COMPONENT
-    PUBLIC_HEADER
-      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
-      COMPONENT "Development"
-    PRIVATE_HEADER
-      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
-      COMPONENT "Development"
 )
 
 if(Doxygen_FOUND)
