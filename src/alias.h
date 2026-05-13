@@ -28,6 +28,9 @@ NS_TYPE(vec_errorable_t);
 #define vec_fit       NS(vec_fit)
 #define vec_scale     NS(vec_scale)
 #define vec_free      NS(vec_free)
+#define io_fill       NS(io_fill)
+#define io_readline   NS(io_readline)
+
 #endif /* YAVL_C_NAMESPACE */
 
 #ifdef YAVL_C_NAMESPACE_UPPER

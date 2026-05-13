@@ -1,0 +1,50 @@
+/** @file
+ *
+ * I/O API extension
+ *
+ * SPDX-License: GPL-3.0-or-later
+ *
+ * @author Dawid Papiewski
+ * @copyright (C) 2026 Dawid Papiewski
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this
+ * program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+#ifndef @YAVL_C_NAMESPACE_UPPER_@IO_H
+#define @YAVL_C_NAMESPACE_UPPER_@IO_H
+#pragma clang final(@YAVL_C_NAMESPACE_UPPER_@IO_H)
+#include "vec.h"
+/** @defgroup IO I/O API
+ *
+ * @brief Stream read and buffering API,
+ * made for parsers in mind.
+ *
+ * @{
+ */
+
+/**
+ * Read from stream until finding '\n'
+ *
+ * @param vec Vector to push buffer into.
+ * @param stream Stream to read line from.
+ */
+@YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@io_readline(@YAVL_C_NAMESPACE_@vec_t *const vec, FILE *const stream);
+/**
+ * Buffer entire stream into vector.
+ *
+ * @param vec Vector to buffer stream into.
+ * @param stream Stream to read data from.
+ */
+@YAVL_C_NAMESPACE_@vec_res_t @YAVL_C_NAMESPACE_@io_fill(@YAVL_C_NAMESPACE_@vec_t *const vec, FILE *const stream);
+
+/** @} */ // IO
+#endif

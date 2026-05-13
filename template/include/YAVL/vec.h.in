@@ -19,6 +19,7 @@
  * program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+#pragma once
 #ifndef @YAVL_C_NAMESPACE_UPPER_@VEC_H
 #define @YAVL_C_NAMESPACE_UPPER_@VEC_H
 #pragma clang final(@YAVL_C_NAMESPACE_UPPER_@VEC_H)
