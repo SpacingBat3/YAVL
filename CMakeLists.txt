@@ -57,6 +57,18 @@ add_library("${PROJECT_NAME}"
 add_library("${PROJECT_NAME}Shared"
   SHARED $<TARGET_OBJECTS:${PROJECT_NAME}Object>)
 
+# Namespaced aliases & export names
+# =================================
+foreach(component "${PROJECT_NAME}" Shared Interface)
+  if("${component}" STREQUAL "${PROJECT_NAME}")
+    add_library("${PROJECT_NAME}::${component}" ALIAS "${PROJECT_NAME}")
+    set_target_properties("${PROJECT_NAME}" PROPERTIES EXPORT_NAME "${component}")
+  else()
+    add_library("${PROJECT_NAME}::${component}" ALIAS "${PROJECT_NAME}${component}")
+    set_target_properties("${PROJECT_NAME}${component}" PROPERTIES EXPORT_NAME "${component}")
+  endif()
+endforeach()
+
 if(Doxygen_FOUND)
   # Doxygen generation (WIP)
   set(DOXYGEN_STRIP_FROM_PATH "${CMAKE_BINARY_DIR}")
@@ -139,35 +151,28 @@ write_basic_package_version_file(
   "${CMAKE_CURRENT_BINARY_DIR}/meta/cmake/${PROJECT_NAME}ConfigVersion.cmake"
   COMPATIBILITY SameMinorVersion
 )
-export(PACKAGE "${PROJECT_NAME}")
-install(EXPORT "${PROJECT_NAME}Targets"
-    NAMESPACE "${PROJECT_NAME}::"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
-    COMPONENT "CMake"
-)
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/meta/cmake/${PROJECT_NAME}Config.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/meta/cmake/${PROJECT_NAME}ConfigVersion.cmake"
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
   COMPONENT "CMake"
 )
-export(EXPORT "${PROJECT_NAME}Targets")
 install(TARGETS
       "${PROJECT_NAME}"
       "${PROJECT_NAME}Interface"
       "${PROJECT_NAME}Shared"
     EXPORT "${PROJECT_NAME}Targets"
     FILE_SET HEADERS
-      COMPONENT "Development"
+      COMPONENT "Interface"
     ARCHIVE
-      COMPONENT "StaticLibrary"
+      COMPONENT "Static"
     LIBRARY
-      COMPONENT "SharedLibrary"
+      COMPONENT "Shared"
       NAMELINK_COMPONENT
 )
 
 if(Doxygen_FOUND)
-  install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/html"
+  install(DIRECTORY "${DOXYGEN_OUTPUT_DIRECTORY}"
     DESTINATION "${CMAKE_INSTALL_DOCDIR}"
     COMPONENT "Docs"
     EXCLUDE_FROM_ALL
@@ -189,3 +194,12 @@ if(CMAKE_MAJOR_VERSION GREATER_EQUAL 4
     VERSION_SCHEMA simple
     COMPONENT "CPS")
 endif()
+
+# Exports
+export(PACKAGE "${PROJECT_NAME}")
+install(EXPORT "${PROJECT_NAME}Targets"
+    NAMESPACE "${PROJECT_NAME}::"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
+    COMPONENT "CMake"
+)
+export(EXPORT "${PROJECT_NAME}Targets" NAMESPACE "${PROJECT_NAME}::")
