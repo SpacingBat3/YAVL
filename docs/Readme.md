@@ -16,7 +16,7 @@ Library does not work on data, but rather on the memory – this means
 you might be able to pack any type into it, and in some cases also
 mix types as well, as long as value types match appropriate offsets
 for values.
-   
+
 ### 2. Stack-like data management
 
 Library offers convenient operations like `push` or `pop` – with
@@ -33,10 +33,10 @@ on it as on any other library you can in CMake.
 ### 4. Common Package Spec support
 
 Outside of CMake, a deployed builds offer a [Common Package Specification][cps]
-metadata for machines with relatively new CMake version installed, so you can 
-integrate it with any tooling to manage your dependencies: CPS offers a more 
-feature-rich package description than `pkg-config` while not requiring any tooling 
-to be `cmake` at some part or another. CPS is still relatively fresh, so adoption 
+metadata for machines with relatively new CMake version installed, so you can
+integrate it with any tooling to manage your dependencies: CPS offers a more
+feature-rich package description than `pkg-config` while not requiring any tooling
+to be `cmake` at some part or another. CPS is still relatively fresh, so adoption
 across tooling might be limited.
 
 ### 5. Pointer validation mechanisms & safety policy
