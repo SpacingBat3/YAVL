@@ -136,24 +136,24 @@ endforeach()
 # Arch PKGBUILD
 # =============
 configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/template/build/PKGBUILD.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/meta/archlinux/PKGBUILD"
+  "${CMAKE_CURRENT_SOURCE_DIR}/template/package/PKGBUILD.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/package/archlinux/PKGBUILD"
 )
 
 # Installation
 # ============
 configure_package_config_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/template/build/config.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/meta/cmake/${PROJECT_NAME}Config.cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/template/package/config.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/package/cmake/${PROJECT_NAME}Config.cmake"
   INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
 )
 write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/meta/cmake/${PROJECT_NAME}ConfigVersion.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/package/cmake/${PROJECT_NAME}ConfigVersion.cmake"
   COMPATIBILITY SameMinorVersion
 )
 install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/meta/cmake/${PROJECT_NAME}Config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/meta/cmake/${PROJECT_NAME}ConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/package/cmake/${PROJECT_NAME}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/package/cmake/${PROJECT_NAME}ConfigVersion.cmake"
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
   COMPONENT "CMake"
 )
