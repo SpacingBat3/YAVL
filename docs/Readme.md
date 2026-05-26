@@ -7,6 +7,18 @@ Rust's `Vec<T>` types.
 
 And yeah, project name is subject to change :/.
 
+Why? / Origin
+-------------
+
+> [![Guess I'm gonna go with C – but damn, there's no std::vector][cppmeme-img]][cppmeme]
+>
+> --- [programmerhumor.io][cppmeme]
+
+With all seriousness, this literally began as my private library
+to deal with the dynamically-sized memory management for data and
+data stream buffering in C. It escalated into *my alternative take
+on vectors* quickly.
+
 Features
 --------
 
@@ -145,3 +157,5 @@ I might be in need to grant various entities additional priviledges
 > feedback).
 
 [CPS]: https://cps-org.github.io
+[cppmeme-img]: https://i.programmerhumor.io/2025/11/243e6ff688cb83065c8c4b0965bc97bc4a8066f4deafaf2086a9948245de2ed3.jpeg
+[cppmeme]: https://programmerhumor.io/cpp-memes/guess-ill-write-my-own-vector-then-cfec "The eternal struggle of C programmers! You start off all confident like "I'll just write some C code" but then reality hits you with "damn, no std::vector" and suddenly you're implementing your own dynamic array from scratch. It's the classic trade-off: bare-metal performance in exchange for manually managing every byte of memory like some kind of digital janitor. And don't forget the joy of buffer overflows waiting to ambush you like memory landmines! This is why C++ programmers look at pure C coders with equal parts respect and concern for their mental health."
