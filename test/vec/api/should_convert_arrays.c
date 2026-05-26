@@ -31,7 +31,7 @@ it_should(convert_arrays) {
     char j;
     yavl_vec_get(&vec, i, &j);
     test_if(heaparr[i]==j) printf("Bug: read: %i!=%i\n",heaparr[i],j);
-    printf(" * %2i | %2i\n",i,j);
+    printf(" * %2zu | %2i\n",i,j);
     test_if(j==i) goto exit;
   }
   for(;i<10;++i) {
