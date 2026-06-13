@@ -31,5 +31,17 @@
 #define NS_UPPER(SYM) SYM
 #endif
 
+// __builtin_expect variant
+#if defined(__has_builtin) && (!defined(LIKELY) || !defined(UNLIKELY))
+#if __has_builtin(__builtin_expect)
+// Hint compiler about branch predictions
 #define LIKELY(x)    __builtin_expect((x), true)
 #define UNLIKELY(x)  __builtin_expect((x), false)
+#endif
+#endif
+// Generic macro defs
+#if !defined(LIKELY) || !defined(UNLIKELY)
+// Standard branch prediction logic
+#define LIKELY(x)    (x)
+#define UNLIKELY(x)  (x)
+#endif
