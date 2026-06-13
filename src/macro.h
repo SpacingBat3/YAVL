@@ -15,22 +15,6 @@
  *
  */
 
-#ifdef YAVL_C_NAMESPACE
-#define __NAMESPACE(NS,SYM) NS##_##SYM
-#define _NAMESPACE(NS,SYM) __NAMESPACE(NS,SYM)
-#define NS(SYM) _NAMESPACE(YAVL_C_NAMESPACE,SYM)
-#else
-#define NS(SYM) SYM
-#endif
-
-#ifdef YAVL_C_NAMESPACE_UPPER
-#define __NAMESPACE_UP(NS,SYM) NS##_##SYM
-#define _NAMESPACE_UP(NS,SYM) __NAMESPACE_UP(NS,SYM)
-#define NS_UPPER(SYM) _NAMESPACE_UP(YAVL_C_NAMESPACE_UPPER,SYM)
-#else
-#define NS_UPPER(SYM) SYM
-#endif
-
 // __builtin_expect variant
 #if defined(__has_builtin) && (!defined(LIKELY) || !defined(UNLIKELY))
 #if __has_builtin(__builtin_expect)
