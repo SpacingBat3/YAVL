@@ -31,8 +31,8 @@
 // performance, but some small wins were gained
 // by limiting jumps and operations in code for
 // the (assumed) most commonly executed logic.
-static inline void adaptcpy(void * dest, const void * src,
-    register size_t len, size_t allignment) {
+static inline void adaptcpy(void *const restrict dest, const void *const restrict src,
+    register size_t len, register size_t allignment) {
   #ifndef YAVL_FAST
   if(UNLIKELY(len==0)) return;
   #endif
@@ -40,7 +40,7 @@ static inline void adaptcpy(void * dest, const void * src,
     while((len&1)==0&&allignment<8) len>>=1,allignment<<=1;
   map:switch (allignment) {
     #define memcpy_typed(T) \
-      while(len) --len,((T*)dest)[len]=((T*)src)[len]; return
+      for(--len;len;--len) ((T*)dest)[len]=((T*)src)[len]; return
     case sizeof(uint8_t):  memcpy_typed(uint8_t);
     case sizeof(uint16_t): memcpy_typed(uint16_t);
     case sizeof(uint32_t): memcpy_typed(uint32_t);
