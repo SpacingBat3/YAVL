@@ -4,8 +4,11 @@ project(YAVL
   VERSION 0.1.0
   LANGUAGES C
 )
+set(YAVL_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+include(CTest)
 
 find_package(Doxygen OPTIONAL_COMPONENTS doxygen)
 
@@ -141,6 +144,10 @@ foreach(header "${${PROJECT_NAME}_GEN_HEADERS}")
       "${${PROJECT_NAME}_GEN_HEADERS_OUTPUT_DIRECTORY}/YAVL/${header}"
   )
 endforeach()
+
+# Tests
+# =====
+add_subdirectory("test/")
 
 # Arch PKGBUILD
 # =============
