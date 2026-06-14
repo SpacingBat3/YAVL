@@ -25,27 +25,37 @@
 
 #include <YAVL/vec.h>
 
-// This is extremely optimized memcpy replacement
-// Made this by benchmarking.
-// Inline makes difference here in regard to the
-// performance, but some small wins were gained
-// by limiting jumps and operations in code for
-// the (assumed) most commonly executed logic.
-static inline void adaptcpy(void *const restrict dest, const void *const restrict src,
-    register size_t len, register size_t allignment) {
+static inline void adaptcpy(void *const dest, const void *const src,
+    size_t len, size_t allignment) {
   #ifndef YAVL_FAST
   if(UNLIKELY(len==0)) return;
   #endif
-  if(UNLIKELY(len&1)) /* Optimized for single and non-optimizable cases. */
-    while((len&1)==0&&allignment<8) len>>=1,allignment<<=1;
-  map:switch (allignment) {
+  opt:if(UNLIKELY((len&1)==0&&allignment<8)) {
+    size_t clz=(len&-len);
+    len*=clz,allignment/=clz;
+  }
+  map:switch(allignment) {
+    #if __clang__
     #define memcpy_typed(T) \
-      for(--len;len;--len) ((T*)dest)[len]=((T*)src)[len]; return
+       for(size_t i=0;i<len;++i) ((T*restrict const)dest)[i] = ((const T*restrict const)src)[i]; \
+       return
+    #else
+    #define memcpy_typed(T) \
+       while(len) --len,((T*restrict const)dest)[len] = ((const T*restrict const)src)[len]; \
+       return
+    #endif
     case sizeof(uint8_t):  memcpy_typed(uint8_t);
     case sizeof(uint16_t): memcpy_typed(uint16_t);
     case sizeof(uint32_t): memcpy_typed(uint32_t);
     case sizeof(uint64_t): memcpy_typed(uint64_t);
-    default: len<<=1,allignment>>=1; goto map;
+    default: if(LIKELY((allignment&1)==0)) {
+      size_t clz=(allignment&-allignment)>>3;
+      len/=clz,allignment*=clz;
+      goto map;
+    } else {
+      len*=allignment,allignment=1;
+      goto opt;
+    }
     #undef memcpy_typed
   }
 }
@@ -79,24 +89,21 @@ vec_res_t vec_push(vec_t *const vec, const void *const data, const size_t num_el
   if(UNLIKELY(vec==NULL))
     return VEC_RES_NULL;
   #endif
-  if(LIKELY(vec->reservd>=vec->len+num_el)) {
-    alloc:adaptcpy(
-      vec->data+(vec->len*vec->allign),
-      data,
-      num_el,
-      vec->allign
-    ),vec->len+=num_el;
-    return VEC_RES_OK;
-  } else /* UNLIKELY(vec->reservd<vec->len+num_el) */ {
+  if(UNLIKELY(vec->reservd<vec->len+num_el)) {
     void *const new = realloc(vec->data, (vec->reservd *= num_el*2)*vec->allign);
-    if(LIKELY(new!=NULL)) {
-      vec->data = new;
-      goto alloc;
-    } else /* UNLIKELY(new==NULL) */ {
+    if(UNLIKELY(new==NULL)) {
       vec->reservd /= num_el*2;
       return VEC_RES_OOM;
     }
+    vec->data = new;
   }
+  adaptcpy(
+    vec->data+(vec->len*vec->allign),
+    data,
+    num_el,
+    vec->allign
+  ),vec->len+=num_el;
+  return VEC_RES_OK;
 }
 
 vec_errorable_t vec_pop(vec_t *const vec, const size_t num_el) {
