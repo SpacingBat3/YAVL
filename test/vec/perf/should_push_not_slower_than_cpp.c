@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#ifndef __STDC_NO_THREADS__
 #include <threads.h>
+#endif
 
 static size_t default_reservd = 0;
 
@@ -35,8 +37,11 @@ static int bench_cpp(void* userdata) {
     if(b)
       data->res_time += (((double)t[1].tv_nsec)/1e9)+(t[1].tv_sec);
   }
-
+  #ifndef __STDC_NO_THREADS__
   return thrd_success;
+  #else
+  return 0;
+  #endif
 }
 
 static int bench_yavl(void* userdata) {
@@ -57,7 +62,11 @@ static int bench_yavl(void* userdata) {
     if(b)
       data->res_time += ((double)t[1].tv_nsec/1e9)+(t[1].tv_sec);
   }
+  #ifndef __STDC_NO_THREADS__
   return thrd_success;
+  #else
+  return 0;
+  #endif
 }
 
 static int bench_inline(void* userdata) {
@@ -89,7 +98,11 @@ static int bench_inline(void* userdata) {
     if(b)
       data->res_time += ((double)t[1].tv_nsec/1e9)+(t[1].tv_sec);
   }
+  #ifndef __STDC_NO_THREADS__
   return thrd_success;
+  #else
+  return 0;
+  #endif
 }
 
 it_should(push_not_slower_than_cpp) {
@@ -116,8 +129,12 @@ it_should(push_not_slower_than_cpp) {
     {.test_data=tdata, .test_data_len=tdata_len},
     {.test_data=tdata, .test_data_len=tdata_len},
   };
+  #ifndef __STDC_NO_THREADS__
   thrd_t thr[3];
   thrd_start_t funs[3] = { bench_yavl,bench_cpp,bench_inline };
+  #else
+  typeof(&bench_yavl) funs[3] = { bench_yavl,bench_cpp,bench_inline };
+  #endif
   char *strs[] = {"YAVL","CPP","inline"};
 
   char ind[3]={0,1,2};
@@ -128,6 +145,7 @@ it_should(push_not_slower_than_cpp) {
     ind[j] = temp;
   }
 
+  #ifndef __STDC_NO_THREADS__
   printf("Running benchmarks in their own threads...\n");
   // Random thread creation, ordered thread collection
   for(size_t i=0;i<sizeof(thr)/sizeof(thr[0]);++i){
@@ -138,6 +156,13 @@ it_should(push_not_slower_than_cpp) {
     thrd_join(thr[i], NULL);
     printf(" * \"%s\" finished! \n",strs[i]);
   }
+  #else
+  printf("Running in single thread only (no standard threads impl)\n");
+  for(size_t i=0;i<sizeof(funs)/sizeof(funs[0]);++i){
+    printf(" * Running \"%s\"...\n",strs[ind[i]]);
+    funs[ind[i]](&bdata[ind[i]]);
+  }
+  #endif
 
   printf(
     "YAVL Score (1):    %lf\n"
