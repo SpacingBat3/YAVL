@@ -6,8 +6,20 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
-#ifndef __STDC_NO_THREADS__
+
+#if !defined(__STDC_NO_THREADS__) && DETECTED_THREAD_IMPL == 1 // C
 #include <threads.h>
+#define THREADS_INCLUDED 1
+#define THREAD_RET int
+#define THREAD_RET_OK thrd_success
+#elif DETECTED_THREAD_IMPL == 2 // POSIX
+#include <pthread.h>
+#define PTHREAD_INCLUDED 1
+#define THREAD_RET void*
+#define THREAD_RET_OK NULL
+#else
+#define THREAD_RET int
+#define THREAD_RET_OK 0
 #endif
 
 static size_t default_reservd = 0;
@@ -18,7 +30,7 @@ typedef struct {
   size_t test_data_len;
 } bench_t;
 
-static int bench_cpp(void* userdata) {
+static THREAD_RET bench_cpp(void* userdata) {
   bench_t *const data = userdata;
   struct timespec t[2] = {};
   cpp_vector(char) *cpp = NULL;
@@ -37,14 +49,10 @@ static int bench_cpp(void* userdata) {
     if(b)
       data->res_time += (((double)t[1].tv_nsec)/1e9)+(t[1].tv_sec);
   }
-  #ifndef __STDC_NO_THREADS__
-  return thrd_success;
-  #else
-  return 0;
-  #endif
+  return THREAD_RET_OK;
 }
 
-static int bench_yavl(void* userdata) {
+static THREAD_RET bench_yavl(void* userdata) {
   bench_t *const data = userdata;
   struct timespec t[2] = {};
   yavl_vec_t yavl = YAVL_VEC_T_ALLOCATOR;
@@ -62,14 +70,10 @@ static int bench_yavl(void* userdata) {
     if(b)
       data->res_time += ((double)t[1].tv_nsec/1e9)+(t[1].tv_sec);
   }
-  #ifndef __STDC_NO_THREADS__
-  return thrd_success;
-  #else
-  return 0;
-  #endif
+  return THREAD_RET_OK;
 }
 
-static int bench_inline(void* userdata) {
+static THREAD_RET bench_inline(void* userdata) {
   bench_t *const data = userdata;
   struct timespec t[2] = {};
   data->res_time=0;
@@ -98,11 +102,7 @@ static int bench_inline(void* userdata) {
     if(b)
       data->res_time += ((double)t[1].tv_nsec/1e9)+(t[1].tv_sec);
   }
-  #ifndef __STDC_NO_THREADS__
-  return thrd_success;
-  #else
-  return 0;
-  #endif
+  return THREAD_RET_OK;
 }
 
 it_should(push_not_slower_than_cpp) {
@@ -129,9 +129,12 @@ it_should(push_not_slower_than_cpp) {
     {.test_data=tdata, .test_data_len=tdata_len},
     {.test_data=tdata, .test_data_len=tdata_len},
   };
-  #ifndef __STDC_NO_THREADS__
+  #if THREADS_INCLUDED
   thrd_t thr[3];
   thrd_start_t funs[3] = { bench_yavl,bench_cpp,bench_inline };
+  #elif PTHREAD_INCLUDED
+  pthread_t thr[3];
+  typeof(&bench_yavl) funs[3] = { bench_yavl,bench_cpp,bench_inline };
   #else
   typeof(&bench_yavl) funs[3] = { bench_yavl,bench_cpp,bench_inline };
   #endif
@@ -145,19 +148,27 @@ it_should(push_not_slower_than_cpp) {
     ind[j] = temp;
   }
 
-  #ifndef __STDC_NO_THREADS__
+  #if THREADS_INCLUDED || PTHREAD_INCLUDED
   printf("Running benchmarks in their own threads...\n");
   // Random thread creation, ordered thread collection
   for(size_t i=0;i<sizeof(thr)/sizeof(thr[0]);++i){
     printf(" * Starting \"%s\"...\n",strs[ind[i]]);
+    #if THREADS_INCLUDED
     thrd_create(&thr[ind[i]], funs[ind[i]], &bdata[ind[i]]);
+    #else
+    pthread_create(&thr[ind[i]], NULL, funs[ind[i]], &bdata[ind[i]]);
+    #endif
   }
   for(size_t i=0;i<sizeof(thr)/sizeof(thr[0]);++i){
+    #if THREADS_INCLUDED
     thrd_join(thr[i], NULL);
+    #else
+    pthread_join(thr[i], NULL);
+    #endif
     printf(" * \"%s\" finished! \n",strs[i]);
   }
   #else
-  printf("Running in single thread only (no standard threads impl)\n");
+  printf("Running in single thread only (no supported threads impl)\n");
   for(size_t i=0;i<sizeof(funs)/sizeof(funs[0]);++i){
     printf(" * Running \"%s\"...\n",strs[ind[i]]);
     funs[ind[i]](&bdata[ind[i]]);
