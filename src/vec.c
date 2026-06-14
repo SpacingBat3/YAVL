@@ -1,4 +1,6 @@
 /*
+ * vec.c - Core vector API
+ *
  * SPDX-License: GPL-3.0-or-later
  *
  * Copyright (C) 2026 Dawid Papiewski

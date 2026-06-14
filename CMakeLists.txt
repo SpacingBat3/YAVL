@@ -50,7 +50,7 @@ message(VERBOSE "YAVL: C symbol namespace: ${YAVL_C_NAMESPACE}")
 
 ## 2. List of auto-generated headers
 set("${PROJECT_NAME}_GEN_HEADERS"
-  "vec.h")
+  "vec.h" "io.h")
 
 # Target list
 # ===========
@@ -126,7 +126,7 @@ endif()
 
 # Header generation and inclusion to API
 # ======================================
-foreach(header "${${PROJECT_NAME}_GEN_HEADERS}")
+foreach(header IN LISTS "${PROJECT_NAME}_GEN_HEADERS")
   configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/template/include/YAVL/${header}.in"
     "${${PROJECT_NAME}_GEN_HEADERS_OUTPUT_DIRECTORY}/YAVL/${header}"
