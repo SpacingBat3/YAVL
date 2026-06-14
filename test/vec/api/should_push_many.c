@@ -17,7 +17,6 @@ it_should(push_many) {
   test_if(vec.len == vec.reservd && vec.reservd == countof(A))
     goto exit;
   for(size_t i = 0; i < countof(A); ++i) {
-    char tescase = -1;
     test_if(yavl_vec_get(&vec, i, &testcase) == YAVL_VEC_RES_OK)
       break;
     test_if(testcase == A[i]) {
